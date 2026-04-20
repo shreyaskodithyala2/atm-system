@@ -1,0 +1,15 @@
+package com.atm.model.enums;
+
+public enum SessionState {
+    IDLE,
+    CARD_INSERTED,
+    AUTHENTICATING,
+    SESSION_ACTIVE,
+    TRANSACTING,
+    AWAITING_APPROVAL,
+    TRANSACTION_COMPLETE,
+    TRANSACTION_FAILED,
+    CARD_RETAINED,
+    MAINTENANCE,
+    ENDED
+}

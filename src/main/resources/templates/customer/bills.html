@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>ATM — Pay Bills</title>
+    <link rel="stylesheet" th:href="@{/css/atm.css}">
+</head>
+<body class="atm-body">
+<div class="atm-machine">
+    <div class="atm-header">
+        <div class="bank-name">🏦 Secure Bank</div>
+        <div class="atm-label">Bill Payment</div>
+    </div>
+
+    <div class="atm-screen">
+        <div class="screen-title">Pay Utility Bills</div>
+
+        <div th:if="${error}" class="alert-atm" th:text="${error}"></div>
+
+        <div class="info-row" style="margin-bottom:16px;">
+            <span>Available Balance</span>
+            <span class="value" style="color:#00e676;"
+                  th:text="'$' + ${#numbers.formatDecimal(account.balance, 1, 2)}"></span>
+        </div>
+
+        <form th:action="@{/atm/session/bills}" method="post">
+            <div style="margin-bottom:14px;">
+                <label class="atm-label">Select Biller</label>
+                <select name="billerId" id="billerSelect" class="atm-input"
+                        style="cursor:pointer;" onchange="updateBillerName(this)" required>
+                    <option value="">— Choose a biller —</option>
+                    <option value="ELEC001" data-name="City Electricity Board">⚡ Electricity Board</option>
+                    <option value="WATER001" data-name="Metro Water Authority">💧 Water Authority</option>
+                    <option value="GAS001" data-name="National Gas Company">🔥 Gas Company</option>
+                    <option value="PHONE001" data-name="TeleCom Services">📞 Telephone Company</option>
+                    <option value="INTERNET001" data-name="FastNet Internet">🌐 Internet Provider</option>
+                    <option value="INSURANCE001" data-name="SecureLife Insurance">🛡 Insurance Premium</option>
+                </select>
+                <input type="hidden" name="billerName" id="billerName" value="">
+            </div>
+            <div style="margin-bottom:14px;">
+                <label class="atm-label">Amount</label>
+                <input type="number" name="amount" class="atm-input"
+                       placeholder="0.00" min="1" max="100000" step="0.01" required>
+            </div>
+            <button type="submit" class="btn-atm-primary">PAY NOW →</button>
+        </form>
+        <div style="margin-top:10px;">
+            <a href="/atm/session/dashboard"
+               style="display:block; text-align:center; padding:10px; text-decoration:none; color:#8b949e; border:1px solid #30363d; border-radius:8px;">
+                ← Back to Menu
+            </a>
+        </div>
+    </div>
+
+    <div class="atm-footer">
+        <a href="/atm/session/dashboard">← Menu</a>
+        <a href="/atm/logout">Logout</a>
+    </div>
+</div>
+<script>
+    function updateBillerName(select) {
+        const opt = select.options[select.selectedIndex];
+        document.getElementById('billerName').value = opt.dataset.name || '';
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>ATM — Transaction History</title>
+    <link rel="stylesheet" th:href="@{/css/atm.css}">
+</head>
+<body class="atm-body">
+<div class="atm-machine">
+    <div class="atm-header">
+        <div class="bank-name">🏦 Secure Bank</div>
+        <div class="atm-label">Transaction History</div>
+    </div>
+
+    <div class="atm-screen" style="padding: 20px;">
+        <div class="screen-title">Recent Transactions</div>
+
+        <div th:if="${transactions.empty}"
+             style="text-align:center; color:#484f58; padding:30px 0; font-size:0.85rem;">
+            No transactions found.
+        </div>
+
+        <div style="max-height: 300px; overflow-y: auto; padding-right: 4px;">
+            <div th:each="tx : ${transactions}"
+                 style="background:#161b22; border:1px solid #30363d; border-radius:8px; padding:12px; margin-bottom:8px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <div style="color:#e6edf3; font-size:0.82rem; font-weight:600;"
+                             th:text="${tx.type}"></div>
+                        <div style="color:#484f58; font-size:0.7rem; margin-top:2px;"
+                             th:text="${#temporals.format(tx.timestamp, 'dd MMM yyyy HH:mm')}"></div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div th:text="'$' + ${#numbers.formatDecimal(tx.amount, 1, 2)}"
+                             style="font-size:0.9rem; font-weight:700;"
+                             th:style="${tx.status.name() == 'COMPLETED'} ? 'color:#00e676' : 'color:#f97316'"></div>
+                        <div style="font-size:0.65rem; margin-top:2px;"
+                             th:text="${tx.status}"
+                             th:style="${tx.status.name() == 'COMPLETED'} ? 'color:#00c853' : (${tx.status.name() == 'AWAITING_APPROVAL'} ? 'color:#f97316' : 'color:#ef5350')"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top:14px;">
+            <a href="/atm/session/dashboard"
+               style="display:block; text-align:center; padding:12px; text-decoration:none; font-weight:700; background:linear-gradient(135deg,#00c853,#00e676); color:#000; border-radius:8px; font-size:0.85rem; letter-spacing:1px;">
+                ← Back to Menu
+            </a>
+        </div>
+    </div>
+
+    <div class="atm-footer">
+        <a href="/atm/session/dashboard">← Menu</a>
+        <a href="/atm/logout">Logout</a>
+    </div>
+</div>
+</body>
+</html>

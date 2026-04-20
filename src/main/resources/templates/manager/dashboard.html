@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Manager Dashboard — Secure Bank</title>
+    <link rel="stylesheet" th:href="@{/css/atm.css}">
+</head>
+<body style="font-family:'Segoe UI',sans-serif; background:#f1f5f9; margin:0;">
+
+<div class="sidebar">
+    <div class="sidebar-header">
+        <h5>🏦 SECURE BANK</h5>
+        <small>Bank Manager Portal</small>
+    </div>
+    <nav class="sidebar-nav">
+        <a href="/staff/manager/dashboard" class="active">📊 Dashboard</a>
+        <a href="/staff/manager/approvals">✅ Pending Approvals
+            <span th:if="${pendingCount > 0}"
+                  style="background:#ef4444;color:white;border-radius:10px;padding:1px 6px;font-size:0.7rem;margin-left:4px;"
+                  th:text="${pendingCount}"></span>
+        </a>
+        <a href="/staff/manager/audit">📋 Audit Transactions</a>
+        <a href="/staff/logout" style="margin-top:auto; color:#ef4444;">🚪 Logout</a>
+    </nav>
+</div>
+
+<div class="main-content">
+    <div style="margin-bottom:24px;">
+        <h4 style="color:#0f172a; margin:0;" th:text="'Welcome, ' + ${manager.name}"></h4>
+        <p style="color:#64748b; margin:4px 0 0; font-size:0.85rem;"
+           th:text="${manager.managerId} + ' · Bank Manager'"></p>
+    </div>
+
+    <div th:if="${message}" style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px 16px;color:#166534;font-size:0.85rem;margin-bottom:20px;" th:text="${message}"></div>
+
+    <!-- Stat cards -->
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:24px;">
+        <div class="stat-card">
+            <div class="stat-value" style="color:#f59e0b;" th:text="${pendingCount}">0</div>
+            <div class="stat-label">Pending Approvals</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" th:text="${todayCount}">0</div>
+            <div class="stat-label">Transactions Today</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" style="color:#10b981;">✓</div>
+            <div class="stat-label">System Status</div>
+        </div>
+    </div>
+
+    <!-- Pending approvals table -->
+    <div style="background:white;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,0.1);overflow:hidden;">
+        <div style="padding:16px 20px;border-bottom:1px solid #f1f5f9;display:flex;justify-content:space-between;align-items:center;">
+            <h6 style="margin:0;color:#0f172a;font-size:0.9rem;">Pending Large Transactions</h6>
+            <a href="/staff/manager/approvals" style="color:#3b82f6;font-size:0.8rem;text-decoration:none;">View All →</a>
+        </div>
+        <div th:if="${pendingTransactions.empty}" style="padding:30px;text-align:center;color:#94a3b8;font-size:0.85rem;">
+            No pending approvals — all clear!
+        </div>
+        <table th:unless="${pendingTransactions.empty}" style="width:100%;border-collapse:collapse;">
+            <thead style="background:#f8fafc;">
+                <tr>
+                    <th style="padding:10px 20px;text-align:left;font-size:0.75rem;color:#64748b;font-weight:600;">TXN ID</th>
+                    <th style="padding:10px;text-align:left;font-size:0.75rem;color:#64748b;font-weight:600;">TYPE</th>
+                    <th style="padding:10px;text-align:left;font-size:0.75rem;color:#64748b;font-weight:600;">AMOUNT</th>
+                    <th style="padding:10px;text-align:left;font-size:0.75rem;color:#64748b;font-weight:600;">TIME</th>
+                    <th style="padding:10px 20px;text-align:left;font-size:0.75rem;color:#64748b;font-weight:600;">ACTION</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="tx : ${pendingTransactions}" style="border-top:1px solid #f1f5f9;">
+                    <td style="padding:12px 20px;font-size:0.8rem;color:#64748b;font-family:monospace;"
+                        th:text="${tx.transactionId.substring(0,8).toUpperCase()}"></td>
+                    <td style="padding:12px 10px;font-size:0.8rem;color:#0f172a;"
+                        th:text="${tx.type}"></td>
+                    <td style="padding:12px 10px;font-size:0.85rem;font-weight:700;color:#dc2626;"
+                        th:text="'$' + ${#numbers.formatDecimal(tx.amount,1,2)}"></td>
+                    <td style="padding:12px 10px;font-size:0.75rem;color:#64748b;"
+                        th:text="${#temporals.format(tx.timestamp,'HH:mm dd/MM')}"></td>
+                    <td style="padding:12px 20px;">
+                        <a th:href="@{/staff/manager/approval/{id}(id=${tx.transactionId})}"
+                           style="background:#dbeafe;color:#1d4ed8;padding:4px 12px;border-radius:6px;font-size:0.75rem;text-decoration:none;font-weight:600;">
+                            Review
+                        </a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>ATM — Insert Card</title>
+    <link rel="stylesheet" th:href="@{/css/atm.css}">
+</head>
+<body class="atm-body">
+<div class="atm-machine">
+    <div class="atm-header">
+        <div class="bank-name">🏦 Secure Bank</div>
+        <div class="atm-label">Automated Teller Machine</div>
+    </div>
+
+    <div class="atm-screen">
+        <div class="screen-title">Insert Card</div>
+
+        <div th:if="${error}" class="alert-atm" th:text="${error}"></div>
+        <div th:if="${message}" class="alert-atm alert-atm-success" th:text="${message}"></div>
+
+        <p style="color:#8b949e; font-size:0.85rem; margin-bottom:20px;">
+            Please enter your 16-digit card number to begin.
+        </p>
+
+        <form th:action="@{/atm/insert-card}" method="post">
+            <div style="margin-bottom: 16px;">
+                <label class="atm-label">Card Number</label>
+                <input type="text" name="cardNumber" class="atm-input"
+                       placeholder="0000 0000 0000 0000"
+                       maxlength="19"
+                       pattern="[\d\s-]{16,19}"
+                       autocomplete="off"
+                       required>
+            </div>
+            <button type="submit" class="btn-atm-primary">PROCEED →</button>
+        </form>
+
+        <div style="margin-top: 16px; text-align: center; color: #484f58; font-size: 0.7rem;">
+            Card numbers for testing are printed in the server console at startup
+        </div>
+    </div>
+
+    <div class="atm-footer">
+        <span>24/7 Banking</span>
+        <span>SecureNet Verified</span>
+    </div>
+</div>
+
+<script>
+    // Auto-format card number with spaces
+    document.querySelector('[name=cardNumber]').addEventListener('input', function() {
+        let v = this.value.replace(/\D/g, '').substring(0, 16);
+        this.value = v.replace(/(.{4})/g, '$1 ').trim();
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>ATM — Receipt</title>
+    <link rel="stylesheet" th:href="@{/css/atm.css}">
+</head>
+<body class="atm-body">
+<div class="atm-machine">
+    <div class="atm-header">
+        <div class="bank-name">🏦 Secure Bank</div>
+        <div class="atm-label">Transaction Receipt</div>
+    </div>
+
+    <div class="atm-screen">
+        <div class="screen-title">Receipt</div>
+
+        <div class="receipt-box">
+            <div class="receipt-header">
+                *** SECURE BANK ATM ***<br>
+                <span style="font-size:0.7rem; color:#484f58;"
+                      th:text="${#temporals.format(transaction.timestamp, 'dd-MMM-yyyy HH:mm:ss')}"></span>
+            </div>
+
+            <div class="receipt-line">
+                <span>TXN ID</span>
+                <span th:text="${transaction.transactionId.substring(0,8).toUpperCase() + '...'}"></span>
+            </div>
+            <div class="receipt-line">
+                <span>TYPE</span>
+                <span th:text="${transaction.type.toUpperCase()}"></span>
+            </div>
+            <div class="receipt-line">
+                <span>AMOUNT</span>
+                <span th:text="'$' + ${#numbers.formatDecimal(transaction.amount, 1, 2)}"></span>
+            </div>
+            <div class="receipt-line">
+                <span>ACCOUNT</span>
+                <span th:text="${account.accountNumber}"></span>
+            </div>
+            <div class="receipt-line">
+                <span>STATUS</span>
+                <span th:text="${transaction.status}"
+                      th:style="${transaction.status.name() == 'COMPLETED'} ? 'color:#00e676' : 'color:#f97316'"></span>
+            </div>
+            <div class="receipt-line" th:if="${transaction.status.name() == 'COMPLETED'}">
+                <span>NEW BALANCE</span>
+                <span style="color:#00e676;"
+                      th:text="'$' + ${#numbers.formatDecimal(account.balance, 1, 2)}"></span>
+            </div>
+
+            <!-- Transfer-specific field -->
+            <div class="receipt-line" th:if="${transaction.isTransfer()}">
+                <span>TO ACCOUNT</span>
+                <span th:text="${transaction.targetAccountNumber}"></span>
+            </div>
+
+            <!-- Bill payment-specific field -->
+            <div class="receipt-line" th:if="${transaction.isBillPayment()}">
+                <span>BILLER</span>
+                <span th:text="${transaction.billerName}"></span>
+            </div>
+
+            <!-- Deposit-specific field -->
+            <div class="receipt-line" th:if="${transaction.isDeposit()}">
+                <span>DEPOSIT TYPE</span>
+                <span th:text="${transaction.depositType}"></span>
+            </div>
+
+            <div style="text-align:center; margin-top:12px; color:#484f58; font-size:0.7rem;">
+                Thank you for banking with Secure Bank<br>
+                Customer Service: 1-800-SECURE
+            </div>
+        </div>
+
+        <div style="margin-top:16px; display:flex; gap:10px;">
+            <a href="/atm/session/dashboard"
+               style="flex:1; display:block; text-align:center; padding:12px; text-decoration:none; font-weight:700; background:linear-gradient(135deg,#00c853,#00e676); color:#000; border-radius:8px; font-size:0.82rem; letter-spacing:1px;">
+                ANOTHER TRANSACTION
+            </a>
+            <a href="/atm/logout"
+               style="flex:1; display:block; text-align:center; padding:12px; text-decoration:none; color:#8b949e; border:1px solid #30363d; border-radius:8px; font-size:0.82rem;">
+                DONE / LOGOUT
+            </a>
+        </div>
+    </div>
+
+    <div class="atm-footer">
+        <span>SecureNet Verified</span>
+        <span>🔒 Encrypted</span>
+    </div>
+</div>
+</body>
+</html>

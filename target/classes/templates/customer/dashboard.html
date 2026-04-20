@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>ATM — Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/atm.css}">
+</head>
+<body class="atm-body">
+<div class="atm-machine">
+    <div class="atm-header">
+        <div class="bank-name">🏦 Secure Bank</div>
+        <div class="atm-label" th:text="'Welcome, ' + ${customer.name}"></div>
+    </div>
+
+    <div class="atm-screen">
+        <div class="screen-title">Main Menu</div>
+
+        <div th:if="${message}" class="alert-atm alert-atm-success" th:text="${message}"></div>
+        <div th:if="${error}" class="alert-atm" th:text="${error}"></div>
+
+        <div class="balance-display" style="margin-bottom: 20px;">
+            <div class="label">Available Balance</div>
+            <div class="amount" th:text="'$' + ${#numbers.formatDecimal(account.balance, 1, 2)}">$0.00</div>
+            <div style="color:#484f58; font-size:0.7rem; margin-top:4px;"
+                 th:text="${account.accountNumber} + ' · ' + ${account.accountType}"></div>
+        </div>
+
+        <div class="menu-grid">
+            <a href="/atm/session/withdraw" class="menu-btn">
+                <span class="icon">💵</span>
+                <span class="label">Withdraw</span>
+            </a>
+            <a href="/atm/session/deposit" class="menu-btn">
+                <span class="icon">🏧</span>
+                <span class="label">Deposit</span>
+            </a>
+            <a href="/atm/session/transfer" class="menu-btn">
+                <span class="icon">↔️</span>
+                <span class="label">Transfer</span>
+            </a>
+            <a href="/atm/session/bills" class="menu-btn">
+                <span class="icon">🧾</span>
+                <span class="label">Pay Bills</span>
+            </a>
+            <a href="/atm/session/balance" class="menu-btn">
+                <span class="icon">📊</span>
+                <span class="label">Balance</span>
+            </a>
+            <a href="/atm/session/history" class="menu-btn">
+                <span class="icon">📋</span>
+                <span class="label">History</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="atm-footer">
+        <span th:text="${customer.atmCard.cardNumber.substring(0,4) + ' **** **** ' + customer.atmCard.cardNumber.substring(12)}">**** **** **** ****</span>
+        <a href="/atm/logout">Logout ×</a>
+    </div>
+</div>
+</body>
+</html>

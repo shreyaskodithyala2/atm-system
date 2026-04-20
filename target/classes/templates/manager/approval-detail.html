@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Approval Detail — Secure Bank</title>
+    <link rel="stylesheet" th:href="@{/css/atm.css}">
+</head>
+<body style="font-family:'Segoe UI',sans-serif; background:#f1f5f9; margin:0;">
+
+<div class="sidebar">
+    <div class="sidebar-header">
+        <h5>🏦 SECURE BANK</h5>
+        <small>Bank Manager Portal</small>
+    </div>
+    <nav class="sidebar-nav">
+        <a href="/staff/manager/dashboard">📊 Dashboard</a>
+        <a href="/staff/manager/approvals" class="active">✅ Pending Approvals</a>
+        <a href="/staff/manager/audit">📋 Audit Transactions</a>
+        <a href="/staff/logout" style="color:#ef4444;">🚪 Logout</a>
+    </nav>
+</div>
+
+<div class="main-content">
+    <div style="margin-bottom:24px;">
+        <a href="/staff/manager/approvals" style="color:#64748b;font-size:0.85rem;text-decoration:none;">← Back to Approvals</a>
+        <h4 style="color:#0f172a; margin:8px 0 0;">Transaction Detail</h4>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+        <!-- Transaction info -->
+        <div style="background:white;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,0.1);padding:24px;">
+            <h6 style="color:#0f172a;margin:0 0 16px;font-size:0.9rem;border-bottom:1px solid #f1f5f9;padding-bottom:10px;">Transaction Information</h6>
+
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f8fafc;">
+                <span style="color:#64748b;font-size:0.82rem;">Transaction ID</span>
+                <span style="font-family:monospace;font-size:0.78rem;color:#0f172a;" th:text="${transaction.transactionId}"></span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f8fafc;">
+                <span style="color:#64748b;font-size:0.82rem;">Type</span>
+                <span style="font-size:0.82rem;font-weight:600;color:#0f172a;"
+                      th:text="${transaction.type}"></span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f8fafc;">
+                <span style="color:#64748b;font-size:0.82rem;">Amount</span>
+                <span style="font-size:1rem;font-weight:700;color:#dc2626;"
+                      th:text="'$' + ${#numbers.formatDecimal(transaction.amount,1,2)}"></span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f8fafc;">
+                <span style="color:#64748b;font-size:0.82rem;">Timestamp</span>
+                <span style="font-size:0.82rem;color:#0f172a;"
+                      th:text="${#temporals.format(transaction.timestamp,'dd MMM yyyy HH:mm:ss')}"></span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f8fafc;">
+                <span style="color:#64748b;font-size:0.82rem;">Status</span>
+                <span class="badge-status-awaiting">AWAITING APPROVAL</span>
+            </div>
+
+            <!-- Transfer-specific -->
+            <div th:if="${transaction.isTransfer()}"
+                 style="display:flex;justify-content:space-between;padding:8px 0;">
+                <span style="color:#64748b;font-size:0.82rem;">Target Account</span>
+                <span style="font-size:0.82rem;color:#0f172a;font-family:monospace;"
+                      th:text="${#strings.toString(transaction.targetAccountNumber)}"></span>
+            </div>
+        </div>
+
+        <!-- Customer info -->
+        <div style="background:white;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,0.1);padding:24px;">
+            <h6 style="color:#0f172a;margin:0 0 16px;font-size:0.9rem;border-bottom:1px solid #f1f5f9;padding-bottom:10px;">Customer Information</h6>
+
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f8fafc;">
+                <span style="color:#64748b;font-size:0.82rem;">Name</span>
+                <span style="font-size:0.82rem;font-weight:600;color:#0f172a;" th:text="${transaction.session.customer.name}"></span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f8fafc;">
+                <span style="color:#64748b;font-size:0.82rem;">Account</span>
+                <span style="font-size:0.82rem;color:#0f172a;" th:text="${transaction.account.accountNumber}"></span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f8fafc;">
+                <span style="color:#64748b;font-size:0.82rem;">Account Type</span>
+                <span style="font-size:0.82rem;color:#0f172a;" th:text="${transaction.account.accountType}"></span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;">
+                <span style="color:#64748b;font-size:0.82rem;">Current Balance</span>
+                <span style="font-size:0.9rem;font-weight:700;color:#059669;"
+                      th:text="'$' + ${#numbers.formatDecimal(transaction.account.balance,1,2)}"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action buttons -->
+    <div style="background:white;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,0.1);padding:24px;margin-top:20px;">
+        <h6 style="color:#0f172a;margin:0 0 8px;font-size:0.9rem;">Authorization Decision</h6>
+        <p style="color:#64748b;font-size:0.82rem;margin:0 0 20px;">
+            The customer's balance is sufficient to cover this transaction.
+            Please review and make your decision.
+        </p>
+        <div style="display:flex;gap:12px;">
+            <form th:action="@{/staff/manager/approve/{id}(id=${transaction.transactionId})}" method="post">
+                <button type="submit"
+                        style="background:#16a34a;color:white;border:none;padding:12px 32px;border-radius:8px;font-size:0.9rem;font-weight:600;cursor:pointer;">
+                    ✓ Approve Transaction
+                </button>
+            </form>
+            <form th:action="@{/staff/manager/decline/{id}(id=${transaction.transactionId})}" method="post">
+                <button type="submit"
+                        style="background:#dc2626;color:white;border:none;padding:12px 32px;border-radius:8px;font-size:0.9rem;font-weight:600;cursor:pointer;">
+                    ✗ Decline Transaction
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

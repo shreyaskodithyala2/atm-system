@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard — Secure Bank</title>
+    <link rel="stylesheet" th:href="@{/css/atm.css}">
+</head>
+<body style="font-family:'Segoe UI',sans-serif; background:#f1f5f9; margin:0;">
+
+<div class="sidebar">
+    <div class="sidebar-header">
+        <h5>🏦 SECURE BANK</h5>
+        <small>System Administrator</small>
+    </div>
+    <nav class="sidebar-nav">
+        <a href="/staff/admin/dashboard" class="active">🖥 Dashboard</a>
+        <a href="/staff/admin/cards">🪪 Retained Cards</a>
+        <a href="/staff/admin/firmware">⚙ Firmware Update</a>
+        <a href="/staff/logout" style="color:#ef4444;">🚪 Logout</a>
+    </nav>
+</div>
+
+<div class="main-content">
+    <div style="margin-bottom:24px;">
+        <h4 style="color:#0f172a; margin:0;" th:text="'Welcome, ' + ${admin.name}"></h4>
+        <p style="color:#64748b; margin:4px 0 0; font-size:0.85rem;"
+           th:text="${admin.adminId} + ' · System Administrator'"></p>
+    </div>
+
+    <div th:if="${message}" style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px 16px;color:#166534;font-size:0.85rem;margin-bottom:20px;" th:text="${message}"></div>
+
+    <!-- System info cards -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;">
+        <div class="stat-card">
+            <div class="stat-value" style="color:#10b981;">●</div>
+            <div class="stat-label">System Status</div>
+            <div style="color:#10b981;font-size:0.75rem;margin-top:4px;">OPERATIONAL</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" style="font-size:1.2rem;" th:text="${admin.firmwareVersion}">v0.0.0</div>
+            <div class="stat-label">Firmware Version</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" style="color:#3b82f6;">H2</div>
+            <div class="stat-label">Database</div>
+            <div style="color:#10b981;font-size:0.75rem;margin-top:4px;">CONNECTED</div>
+        </div>
+    </div>
+
+    <!-- Action panels -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+        <!-- Diagnostics -->
+        <div style="background:white;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,0.1);padding:24px;">
+            <div style="font-size:1.5rem;margin-bottom:12px;">🔍</div>
+            <h6 style="color:#0f172a;margin:0 0 8px;font-size:0.95rem;">Remote Diagnostics</h6>
+            <p style="color:#64748b;font-size:0.82rem;margin:0 0 20px;">
+                Run a full system diagnostic check including hardware status,
+                network connectivity, and database health.
+            </p>
+            <form th:action="@{/staff/admin/diagnostics}" method="post">
+                <button type="submit"
+                        style="background:#0f172a;color:white;border:none;padding:10px 20px;border-radius:8px;font-size:0.85rem;font-weight:600;cursor:pointer;width:100%;">
+                    Run Diagnostics →
+                </button>
+            </form>
+        </div>
+
+        <!-- Firmware -->
+        <div style="background:white;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,0.1);padding:24px;">
+            <div style="font-size:1.5rem;margin-bottom:12px;">⚙️</div>
+            <h6 style="color:#0f172a;margin:0 0 8px;font-size:0.95rem;">Firmware Management</h6>
+            <p style="color:#64748b;font-size:0.82rem;margin:0 0 20px;">
+                Update the ATM system firmware to a new version.
+                Current version: <strong th:text="${admin.firmwareVersion}"></strong>
+            </p>
+            <a href="/staff/admin/firmware"
+               style="display:block;background:#1d4ed8;color:white;padding:10px 20px;border-radius:8px;font-size:0.85rem;font-weight:600;text-decoration:none;text-align:center;">
+                Manage Firmware →
+            </a>
+        </div>
+
+        <!-- Retained Cards -->
+        <div style="background:white;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,0.1);padding:24px;">
+            <div style="font-size:1.5rem;margin-bottom:12px;">🪪</div>
+            <h6 style="color:#0f172a;margin:0 0 8px;font-size:0.95rem;">Retained Cards</h6>
+            <p style="color:#64748b;font-size:0.82rem;margin:0 0 20px;">
+                View and manage cards that have been retained due to security violations.
+            </p>
+            <a href="/staff/admin/cards"
+               style="display:block;background:#dc2626;color:white;padding:10px 20px;border-radius:8px;font-size:0.85rem;font-weight:600;text-decoration:none;text-align:center;">
+                View Retained Cards →
+            </a>
+        </div>
+
+        <!-- System info -->
+        <div style="background:white;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,0.1);padding:24px;">
+            <div style="font-size:1.5rem;margin-bottom:12px;">📡</div>
+            <h6 style="color:#0f172a;margin:0 0 8px;font-size:0.95rem;">External Integrations</h6>
+            <div style="font-size:0.8rem;">
+                <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f1f5f9;">
+                    <span style="color:#64748b;">Card Network</span>
+                    <span style="color:#10b981;">● SecureNet</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f1f5f9;">
+                    <span style="color:#64748b;">Core Banking</span>
+                    <span style="color:#10b981;">● Connected</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:6px 0;">
+                    <span style="color:#64748b;">H2 Console</span>
+                    <a href="/h2-console" target="_blank" style="color:#3b82f6;">Open →</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

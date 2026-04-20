@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>ATM — Withdraw Cash</title>
+    <link rel="stylesheet" th:href="@{/css/atm.css}">
+</head>
+<body class="atm-body">
+<div class="atm-machine">
+    <div class="atm-header">
+        <div class="bank-name">🏦 Secure Bank</div>
+        <div class="atm-label">Cash Withdrawal</div>
+    </div>
+
+    <div class="atm-screen">
+        <div class="screen-title">Withdraw Cash</div>
+
+        <div th:if="${error}" class="alert-atm" th:text="${error}"></div>
+
+        <div class="info-row">
+            <span>Available Balance</span>
+            <span class="value" style="color:#00e676;"
+                  th:text="'$' + ${#numbers.formatDecimal(account.balance, 1, 2)}"></span>
+        </div>
+        <div style="margin: 16px 0 8px; color:#8b949e; font-size:0.75rem; letter-spacing:1px;">QUICK AMOUNTS</div>
+        <div class="quick-amounts">
+            <button type="button" class="quick-amt-btn" onclick="setAmount(20)">$20</button>
+            <button type="button" class="quick-amt-btn" onclick="setAmount(50)">$50</button>
+            <button type="button" class="quick-amt-btn" onclick="setAmount(100)">$100</button>
+            <button type="button" class="quick-amt-btn" onclick="setAmount(200)">$200</button>
+            <button type="button" class="quick-amt-btn" onclick="setAmount(500)">$500</button>
+            <button type="button" class="quick-amt-btn" onclick="setAmount(1000)">$1,000</button>
+            <button type="button" class="quick-amt-btn" onclick="setAmount(5000)">$5,000</button>
+            <button type="button" class="quick-amt-btn" onclick="setAmount(8000)">$8,000</button>
+        </div>
+
+        <form th:action="@{/atm/session/withdraw}" method="post">
+            <div style="margin-bottom: 16px;">
+                <label class="atm-label">Or enter custom amount</label>
+                <input type="number" name="amount" id="amountInput" class="atm-input"
+                       placeholder="0.00" min="1" max="50000" step="0.01" required>
+            </div>
+            <div style="color:#484f58; font-size:0.72rem; margin-bottom:16px;">
+                ⚠ Transactions above $5,000 require Bank Manager approval
+            </div>
+            <button type="submit" class="btn-atm-primary">WITHDRAW →</button>
+        </form>
+        <div style="margin-top: 10px;">
+            <a href="/atm/session/dashboard" class="btn-atm-secondary"
+               style="display:block; text-align:center; padding:10px; text-decoration:none; color:#8b949e; border:1px solid #30363d; border-radius:8px;">
+                ← Back to Menu
+            </a>
+        </div>
+    </div>
+
+    <div class="atm-footer">
+        <a href="/atm/session/dashboard">← Menu</a>
+        <a href="/atm/logout">Logout</a>
+    </div>
+</div>
+<script>
+    function setAmount(val) {
+        document.getElementById('amountInput').value = val;
+    }
+</script>
+</body>
+</html>

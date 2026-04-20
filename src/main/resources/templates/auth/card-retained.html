@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>ATM — Card Retained</title>
+    <link rel="stylesheet" th:href="@{/css/atm.css}">
+</head>
+<body class="atm-body">
+<div class="atm-machine">
+    <div class="atm-header">
+        <div class="bank-name">🏦 Secure Bank</div>
+        <div class="atm-label">Security Alert</div>
+    </div>
+
+    <div class="atm-screen">
+        <div style="text-align:center; padding: 20px 0;">
+            <div style="font-size: 3rem; margin-bottom: 16px;">🚫</div>
+            <div style="color: #ef5350; font-size: 1rem; font-weight: 700; letter-spacing: 2px; margin-bottom: 12px;">
+                CARD RETAINED
+            </div>
+            <div th:if="${error}" style="color: #ef9a9a; font-size: 0.85rem; margin-bottom: 16px;" th:text="${error}"></div>
+            <div th:unless="${error}" style="color: #ef9a9a; font-size: 0.85rem; margin-bottom: 16px;">
+                Your card has been retained due to multiple incorrect PIN attempts.
+                A silent security alert has been triggered.
+            </div>
+            <div style="background: #1f1f1f; border: 1px solid #ef535033; border-radius: 8px; padding: 16px; margin: 16px 0;">
+                <div style="color: #8b949e; font-size: 0.8rem; line-height: 1.8;">
+                    Please contact your bank branch to:<br>
+                    • Retrieve your card<br>
+                    • Reset your PIN<br>
+                    • Verify your identity
+                </div>
+            </div>
+            <div style="color: #484f58; font-size: 0.7rem; margin-bottom: 20px;">
+                Customer Service: 1-800-SECURE-BANK
+            </div>
+            <a href="/atm/insert-card" class="btn-atm-secondary"
+               style="display:block; text-align:center; padding:10px; text-decoration:none; color:#8b949e; border:1px solid #30363d; border-radius:8px;">
+                Return to Home
+            </a>
+        </div>
+    </div>
+
+    <div class="atm-footer">
+        <span>Security Protocol Active</span>
+        <span>🔴 Alert Sent</span>
+    </div>
+</div>
+</body>
+</html>

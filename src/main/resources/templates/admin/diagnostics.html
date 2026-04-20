@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Diagnostics — Secure Bank</title>
+    <link rel="stylesheet" th:href="@{/css/atm.css}">
+</head>
+<body style="font-family:'Segoe UI',sans-serif; background:#f1f5f9; margin:0;">
+
+<div class="sidebar">
+    <div class="sidebar-header">
+        <h5>🏦 SECURE BANK</h5>
+        <small>System Administrator</small>
+    </div>
+    <nav class="sidebar-nav">
+        <a href="/staff/admin/dashboard">🖥 Dashboard</a>
+        <a href="/staff/admin/cards">🪪 Retained Cards</a>
+        <a href="/staff/admin/firmware">⚙ Firmware Update</a>
+        <a href="/staff/logout" style="color:#ef4444;">🚪 Logout</a>
+    </nav>
+</div>
+
+<div class="main-content">
+    <div style="margin-bottom:24px;">
+        <a href="/staff/admin/dashboard" style="color:#64748b;font-size:0.85rem;text-decoration:none;">← Back to Dashboard</a>
+        <h4 style="color:#0f172a; margin:8px 0 0;">Remote Diagnostics Report</h4>
+        <p style="color:#64748b;font-size:0.82rem;margin:4px 0 0;"
+           th:text="'Generated at: ' + ${#temporals.format(report.runAt, 'dd MMM yyyy HH:mm:ss')}"></p>
+    </div>
+
+    <!-- Status overview -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;">
+        <div class="stat-card" style="border-left:4px solid #10b981;">
+            <div style="font-size:1.2rem;">🖥</div>
+            <div style="font-weight:700;color:#0f172a;font-size:0.9rem;" th:text="${report.systemStatus}"></div>
+            <div class="stat-label">System</div>
+        </div>
+        <div class="stat-card" style="border-left:4px solid #10b981;">
+            <div style="font-size:1.2rem;">🗄</div>
+            <div style="font-weight:700;color:#0f172a;font-size:0.9rem;" th:text="${report.databaseStatus}"></div>
+            <div class="stat-label">Database</div>
+        </div>
+        <div class="stat-card" style="border-left:4px solid #10b981;">
+            <div style="font-size:1.2rem;">📡</div>
+            <div style="font-weight:700;color:#0f172a;font-size:0.9rem;" th:text="${report.networkStatus}"></div>
+            <div class="stat-label">Network</div>
+        </div>
+        <div class="stat-card" style="border-left:4px solid #10b981;">
+            <div style="font-size:1.2rem;">💳</div>
+            <div style="font-weight:700;color:#0f172a;font-size:0.9rem;" th:text="${report.cardReaderStatus}"></div>
+            <div class="stat-label">Card Reader</div>
+        </div>
+    </div>
+
+    <!-- Detailed report terminal-style -->
+    <div style="background:#0d1117;border-radius:12px;padding:24px;font-family:'Courier New',monospace;font-size:0.82rem;color:#8b949e;box-shadow:0 4px 12px rgba(0,0,0,0.2);">
+        <div style="color:#00d4ff;margin-bottom:12px;font-size:0.85rem;">$ ./run_diagnostics.sh --full</div>
+
+        <div style="margin-bottom:6px;"><span style="color:#00e676;">[OK]</span> System Status: <span style="color:#e6edf3;" th:text="${report.systemStatus}"></span></div>
+        <div style="margin-bottom:6px;"><span style="color:#00e676;">[OK]</span> Database Connection: <span style="color:#e6edf3;" th:text="${report.databaseStatus}"></span></div>
+        <div style="margin-bottom:6px;"><span style="color:#00e676;">[OK]</span> Network Interface: <span style="color:#e6edf3;" th:text="${report.networkStatus}"></span></div>
+        <div style="margin-bottom:6px;"><span style="color:#00e676;">[OK]</span> Cash Dispenser: <span style="color:#e6edf3;" th:text="${report.cashDispenserStatus}"></span></div>
+        <div style="margin-bottom:6px;"><span style="color:#00e676;">[OK]</span> Card Reader: <span style="color:#e6edf3;" th:text="${report.cardReaderStatus}"></span></div>
+        <div style="margin-bottom:6px;"><span style="color:#00e676;">[OK]</span> Firmware Version: <span style="color:#e6edf3;" th:text="${report.firmwareVersion}"></span></div>
+
+        <div style="border-top:1px solid #30363d;margin:14px 0;"></div>
+
+        <div style="margin-bottom:6px;"><span style="color:#f97316;">[INFO]</span> Total Sessions on Record: <span style="color:#e6edf3;" th:text="${report.activeSessionCount}"></span></div>
+        <div style="margin-bottom:6px;"><span style="color:#f97316;">[INFO]</span> Transactions Today: <span style="color:#e6edf3;" th:text="${report.todayTransactionCount}"></span></div>
+        <div style="margin-bottom:6px;" th:classappend="${report.retainedCardCount > 0} ? '' : ''">
+            <span th:if="${report.retainedCardCount > 0}" style="color:#ef5350;">[WARN]</span>
+            <span th:unless="${report.retainedCardCount > 0}" style="color:#00e676;">[OK]</span>
+            Retained Cards: <span style="color:#e6edf3;" th:text="${report.retainedCardCount}"></span>
+        </div>
+
+        <div style="border-top:1px solid #30363d;margin:14px 0;"></div>
+        <div style="color:#00e676;">Diagnostics complete. All systems operational.</div>
+        <div style="color:#484f58;margin-top:4px;" th:text="'Report generated: ' + ${#temporals.format(report.runAt,'yyyy-MM-dd HH:mm:ss')}"></div>
+    </div>
+
+    <div style="margin-top:16px;">
+        <form th:action="@{/staff/admin/diagnostics}" method="post" style="display:inline;">
+            <button type="submit" style="background:#0f172a;color:white;border:none;padding:10px 20px;border-radius:8px;font-size:0.85rem;font-weight:600;cursor:pointer;margin-right:10px;">
+                🔄 Run Again
+            </button>
+        </form>
+        <a href="/staff/admin/dashboard" style="color:#64748b;font-size:0.85rem;text-decoration:none;">← Back to Dashboard</a>
+    </div>
+</div>
+</body>
+</html>

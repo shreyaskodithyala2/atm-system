@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>ATM — Enter PIN</title>
+    <link rel="stylesheet" th:href="@{/css/atm.css}">
+</head>
+<body class="atm-body">
+<div class="atm-machine">
+    <div class="atm-header">
+        <div class="bank-name">🏦 Secure Bank</div>
+        <div class="atm-label">PIN Verification</div>
+    </div>
+
+    <div class="atm-screen">
+        <div class="screen-title">Enter Your PIN</div>
+
+        <div th:if="${error}" class="alert-atm" th:text="${error}"></div>
+
+        <p style="color:#8b949e; font-size:0.85rem; margin-bottom:16px;">
+            Card accepted. Please enter your 4-digit PIN.
+        </p>
+
+        <div class="pin-dots" id="pinDots">
+            <div class="pin-dot" id="dot1"></div>
+            <div class="pin-dot" id="dot2"></div>
+            <div class="pin-dot" id="dot3"></div>
+            <div class="pin-dot" id="dot4"></div>
+        </div>
+
+        <form th:action="@{/atm/pin-entry}" method="post" id="pinForm">
+            <input type="password" name="pin" id="pinInput" class="atm-input"
+                   placeholder="Enter 4-digit PIN"
+                   maxlength="4" pattern="\d{4}"
+                   autocomplete="off" inputmode="numeric"
+                   style="text-align:center; letter-spacing: 6px; font-size: 1.2rem;"
+                   required>
+
+            <div th:if="${attemptsRemaining != null}"
+                 style="text-align:center; color:#f97316; font-size:0.8rem; margin: 8px 0;"
+                 th:text="'Attempts remaining: ' + ${attemptsRemaining}">
+            </div>
+
+            <div style="margin-top: 20px; display: flex; gap: 10px;">
+                <button type="submit" class="btn-atm-primary">CONFIRM</button>
+            </div>
+            <div style="margin-top: 10px;">
+                <a href="/atm/insert-card" class="btn-atm-secondary"
+                   style="display:block; text-align:center; padding:10px; text-decoration:none; color:#8b949e; border:1px solid #30363d; border-radius:8px;">
+                    ← Cancel / Eject Card
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <div class="atm-footer">
+        <span>PIN is encrypted</span>
+        <span>🔒 Secure Session</span>
+    </div>
+</div>
+
+<script>
+    const input = document.getElementById('pinInput');
+    const dots = [
+        document.getElementById('dot1'),
+        document.getElementById('dot2'),
+        document.getElementById('dot3'),
+        document.getElementById('dot4')
+    ];
+
+    input.addEventListener('input', function() {
+        this.value = this.value.replace(/\D/g, '').substring(0, 4);
+        dots.forEach((dot, i) => {
+            dot.classList.toggle('filled', i < this.value.length);
+        });
+    });
+
+    input.focus();
+</script>
+</body>
+</html>

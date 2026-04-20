@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Audit Transactions — Secure Bank</title>
+    <link rel="stylesheet" th:href="@{/css/atm.css}">
+</head>
+<body style="font-family:'Segoe UI',sans-serif; background:#f1f5f9; margin:0;">
+
+<div class="sidebar">
+    <div class="sidebar-header">
+        <h5>🏦 SECURE BANK</h5>
+        <small>Bank Manager Portal</small>
+    </div>
+    <nav class="sidebar-nav">
+        <a href="/staff/manager/dashboard">📊 Dashboard</a>
+        <a href="/staff/manager/approvals">✅ Pending Approvals</a>
+        <a href="/staff/manager/audit" class="active">📋 Audit Transactions</a>
+        <a href="/staff/logout" style="color:#ef4444;">🚪 Logout</a>
+    </nav>
+</div>
+
+<div class="main-content">
+    <div style="margin-bottom:24px;">
+        <h4 style="color:#0f172a; margin:0;">Daily Audit</h4>
+        <p style="color:#64748b; margin:4px 0 0; font-size:0.85rem;">Review all transactions for a selected date</p>
+    </div>
+
+    <!-- Date picker -->
+    <div style="background:white;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,0.1);padding:20px;margin-bottom:20px;">
+        <form th:action="@{/staff/manager/audit}" method="post" style="display:flex;align-items:center;gap:12px;">
+            <label style="color:#374151;font-size:0.85rem;font-weight:600;">Select Date:</label>
+            <input type="date" name="date"
+                   th:value="${date}"
+                   style="padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:0.85rem;color:#0f172a;">
+            <button type="submit"
+                    style="background:#1d4ed8;color:white;border:none;padding:8px 20px;border-radius:8px;font-size:0.85rem;font-weight:600;cursor:pointer;">
+                View Audit
+            </button>
+        </form>
+    </div>
+
+    <!-- Summary cards -->
+    <div th:if="${transactions != null}"
+         style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px;">
+        <div class="stat-card">
+            <div class="stat-value" th:text="${totalCount ?: transactions.size()}">0</div>
+            <div class="stat-label">Total Transactions</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" style="color:#dc2626;"
+                 th:text="'$' + ${#numbers.formatDecimal(totalAmount ?: 0, 1, 2)}">$0</div>
+            <div class="stat-label">Total Volume</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-value" style="color:#f59e0b;"
+                 th:text="${pendingInAudit != null ? pendingInAudit : 0}">0</div>
+            <div class="stat-label">Pending in Period</div>
+        </div>
+    </div>
+
+    <!-- Transaction table -->
+    <div style="background:white;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,0.1);overflow:hidden;">
+        <div style="padding:16px 20px;border-bottom:1px solid #f1f5f9;">
+            <h6 style="margin:0;color:#0f172a;font-size:0.9rem;"
+                th:text="'Transactions for ' + ${date}">Transactions</h6>
+        </div>
+
+        <div th:if="${transactions == null or transactions.empty}"
+             style="padding:60px;text-align:center;color:#94a3b8;">
+            No transactions found for this date.
+        </div>
+
+        <table th:unless="${transactions == null or transactions.empty}" style="width:100%;border-collapse:collapse;">
+            <thead style="background:#f8fafc;">
+                <tr>
+                    <th style="padding:10px 20px;text-align:left;font-size:0.75rem;color:#64748b;font-weight:600;">TXN ID</th>
+                    <th style="padding:10px;text-align:left;font-size:0.75rem;color:#64748b;font-weight:600;">TYPE</th>
+                    <th style="padding:10px;text-align:left;font-size:0.75rem;color:#64748b;font-weight:600;">CUSTOMER</th>
+                    <th style="padding:10px;text-align:left;font-size:0.75rem;color:#64748b;font-weight:600;">AMOUNT</th>
+                    <th style="padding:10px;text-align:left;font-size:0.75rem;color:#64748b;font-weight:600;">TIME</th>
+                    <th style="padding:10px 20px;text-align:left;font-size:0.75rem;color:#64748b;font-weight:600;">STATUS</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="tx : ${transactions}" style="border-top:1px solid #f1f5f9;">
+                    <td style="padding:12px 20px;font-size:0.75rem;color:#64748b;font-family:monospace;"
+                        th:text="${tx.transactionId.substring(0,8).toUpperCase()}"></td>
+                    <td style="padding:12px 10px;font-size:0.82rem;color:#0f172a;"
+                        th:text="${tx.type}"></td>
+                    <td style="padding:12px 10px;font-size:0.82rem;color:#0f172a;"
+                        th:text="${tx.session.customer.name}"></td>
+                    <td style="padding:12px 10px;font-size:0.85rem;font-weight:700;color:#0f172a;"
+                        th:text="'$' + ${#numbers.formatDecimal(tx.amount,1,2)}"></td>
+                    <td style="padding:12px 10px;font-size:0.75rem;color:#64748b;"
+                        th:text="${#temporals.format(tx.timestamp,'HH:mm:ss')}"></td>
+                    <td style="padding:12px 20px;">
+                        <span th:text="${tx.status}"
+                              th:class="${'badge-status-' + tx.status.name().toLowerCase().replace('_','-')}">
+                        </span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

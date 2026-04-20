@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>ATM — Deposit Funds</title>
+    <link rel="stylesheet" th:href="@{/css/atm.css}">
+</head>
+<body class="atm-body">
+<div class="atm-machine">
+    <div class="atm-header">
+        <div class="bank-name">🏦 Secure Bank</div>
+        <div class="atm-label">Deposit Funds</div>
+    </div>
+
+    <div class="atm-screen">
+        <div class="screen-title">Deposit Funds</div>
+
+        <div th:if="${error}" class="alert-atm" th:text="${error}"></div>
+
+        <div class="info-row" style="margin-bottom:16px;">
+            <span>Current Balance</span>
+            <span class="value" style="color:#00e676;"
+                  th:text="'$' + ${#numbers.formatDecimal(account.balance, 1, 2)}"></span>
+        </div>
+
+        <form th:action="@{/atm/session/deposit}" method="post">
+            <div style="margin-bottom: 16px;">
+                <label class="atm-label">Deposit Type</label>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:6px;">
+                    <label style="cursor:pointer;">
+                        <input type="radio" name="depositType" value="CASH" checked style="display:none;" id="cashBtn">
+                        <div class="quick-amt-btn" id="cashLabel"
+                             style="padding:12px; border-color:#00d4ff; color:#00d4ff;">
+                            💵 Cash
+                        </div>
+                    </label>
+                    <label style="cursor:pointer;">
+                        <input type="radio" name="depositType" value="CHEQUE" style="display:none;" id="chequeBtn">
+                        <div class="quick-amt-btn" id="chequeLabel" style="padding:12px;">
+                            🧾 Cheque
+                        </div>
+                    </label>
+                </div>
+            </div>
+            <div style="margin-bottom: 16px;">
+                <label class="atm-label">Amount to Deposit</label>
+                <input type="number" name="amount" class="atm-input"
+                       placeholder="0.00" min="1" max="1000000" step="0.01" required>
+            </div>
+            <button type="submit" class="btn-atm-primary">DEPOSIT →</button>
+        </form>
+        <div style="margin-top:10px;">
+            <a href="/atm/session/dashboard"
+               style="display:block; text-align:center; padding:10px; text-decoration:none; color:#8b949e; border:1px solid #30363d; border-radius:8px;">
+                ← Back to Menu
+            </a>
+        </div>
+    </div>
+
+    <div class="atm-footer">
+        <a href="/atm/session/dashboard">← Menu</a>
+        <a href="/atm/logout">Logout</a>
+    </div>
+</div>
+<script>
+    document.querySelectorAll('input[name=depositType]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            document.getElementById('cashLabel').style.borderColor = '#30363d';
+            document.getElementById('cashLabel').style.color = '#8b949e';
+            document.getElementById('chequeLabel').style.borderColor = '#30363d';
+            document.getElementById('chequeLabel').style.color = '#8b949e';
+            const lbl = document.getElementById(this.id.replace('Btn','Label'));
+            lbl.style.borderColor = '#00d4ff';
+            lbl.style.color = '#00d4ff';
+        });
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Firmware — Secure Bank</title>
+    <link rel="stylesheet" th:href="@{/css/atm.css}">
+</head>
+<body style="font-family:'Segoe UI',sans-serif; background:#f1f5f9; margin:0;">
+
+<div class="sidebar">
+    <div class="sidebar-header">
+        <h5>🏦 SECURE BANK</h5>
+        <small>System Administrator</small>
+    </div>
+    <nav class="sidebar-nav">
+        <a href="/staff/admin/dashboard">🖥 Dashboard</a>
+        <a href="/staff/admin/cards">🪪 Retained Cards</a>
+        <a href="/staff/admin/firmware" class="active">⚙ Firmware Update</a>
+        <a href="/staff/logout" style="color:#ef4444;">🚪 Logout</a>
+    </nav>
+</div>
+
+<div class="main-content">
+    <div style="margin-bottom:24px;">
+        <a href="/staff/admin/dashboard" style="color:#64748b;font-size:0.85rem;text-decoration:none;">← Back to Dashboard</a>
+        <h4 style="color:#0f172a; margin:8px 0 0;">Firmware Management</h4>
+        <p style="color:#64748b; margin:4px 0 0; font-size:0.85rem;">Update ATM system firmware version</p>
+    </div>
+
+    <div th:if="${message}" style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px 16px;color:#166534;font-size:0.85rem;margin-bottom:20px;" th:text="${message}"></div>
+    <div th:if="${error}" style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:12px 16px;color:#991b1b;font-size:0.85rem;margin-bottom:20px;" th:text="${error}"></div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+
+        <!-- Current status -->
+        <div style="background:white;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,0.1);padding:24px;">
+            <h6 style="color:#0f172a;margin:0 0 16px;font-size:0.9rem;border-bottom:1px solid #f1f5f9;padding-bottom:10px;">Current Firmware Status</h6>
+
+            <div style="text-align:center;padding:20px 0;">
+                <div style="font-size:2rem;margin-bottom:8px;">⚙️</div>
+                <div style="font-size:1.4rem;font-weight:700;color:#0f172a;font-family:monospace;"
+                     th:text="'v' + ${currentVersion}">v0.0.0</div>
+                <div style="color:#10b981;font-size:0.8rem;margin-top:4px;">● INSTALLED &amp; RUNNING</div>
+            </div>
+
+            <div style="background:#f8fafc;border-radius:8px;padding:16px;font-size:0.8rem;">
+                <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f1f5f9;">
+                    <span style="color:#64748b;">Administrator</span>
+                    <span style="color:#0f172a;font-weight:600;" th:text="${admin.name}"></span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f1f5f9;">
+                    <span style="color:#64748b;">Admin ID</span>
+                    <span style="color:#0f172a;" th:text="${admin.adminId}"></span>
+                </div>
+                <div style="display:flex;justify-content:space-between;padding:4px 0;">
+                    <span style="color:#64748b;">System</span>
+                    <span style="color:#10b981;">OPERATIONAL</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Update form -->
+        <div style="background:white;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,0.1);padding:24px;">
+            <h6 style="color:#0f172a;margin:0 0 16px;font-size:0.9rem;border-bottom:1px solid #f1f5f9;padding-bottom:10px;">Update Firmware</h6>
+
+            <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:8px;padding:12px;margin-bottom:16px;font-size:0.8rem;color:#92400e;">
+                ⚠ Warning: Firmware update will be applied immediately. Ensure all active sessions are completed before proceeding.
+            </div>
+
+            <form th:action="@{/staff/admin/firmware}" method="post">
+                <div style="margin-bottom:16px;">
+                    <label style="display:block;color:#374151;font-size:0.85rem;font-weight:600;margin-bottom:6px;">New Firmware Version</label>
+                    <input type="text" name="version"
+                           placeholder="e.g. 2.5.0"
+                           pattern="\d+\.\d+\.\d+"
+                           title="Use semantic versioning: MAJOR.MINOR.PATCH"
+                           style="width:100%;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:0.9rem;font-family:monospace;box-sizing:border-box;"
+                           required>
+                    <div style="color:#64748b;font-size:0.75rem;margin-top:4px;">Format: MAJOR.MINOR.PATCH (e.g. 2.5.0)</div>
+                </div>
+
+                <div style="margin-bottom:16px;">
+                    <label style="display:block;color:#374151;font-size:0.85rem;font-weight:600;margin-bottom:6px;">Update Notes (optional)</label>
+                    <textarea style="width:100%;padding:10px 14px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:0.85rem;resize:vertical;min-height:80px;box-sizing:border-box;"
+                              placeholder="Describe what's new in this firmware version..."></textarea>
+                </div>
+
+                <button type="submit"
+                        style="background:#1d4ed8;color:white;border:none;padding:12px;width:100%;border-radius:8px;font-size:0.9rem;font-weight:600;cursor:pointer;">
+                    ⚙ Apply Firmware Update
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Update history (simulated) -->
+    <div style="background:white;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,0.1);padding:24px;margin-top:20px;">
+        <h6 style="color:#0f172a;margin:0 0 16px;font-size:0.9rem;">Firmware History</h6>
+        <table style="width:100%;border-collapse:collapse;">
+            <thead style="background:#f8fafc;">
+                <tr>
+                    <th style="padding:10px;text-align:left;font-size:0.75rem;color:#64748b;font-weight:600;">VERSION</th>
+                    <th style="padding:10px;text-align:left;font-size:0.75rem;color:#64748b;font-weight:600;">STATUS</th>
+                    <th style="padding:10px;text-align:left;font-size:0.75rem;color:#64748b;font-weight:600;">NOTES</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="border-top:1px solid #f1f5f9;">
+                    <td style="padding:10px;font-family:monospace;font-size:0.82rem;font-weight:600;color:#0f172a;"
+                        th:text="'v' + ${currentVersion}"></td>
+                    <td style="padding:10px;"><span style="background:#dcfce7;color:#166534;padding:3px 8px;border-radius:4px;font-size:0.75rem;">CURRENT</span></td>
+                    <td style="padding:10px;font-size:0.8rem;color:#64748b;">Active firmware version</td>
+                </tr>
+                <tr style="border-top:1px solid #f1f5f9;">
+                    <td style="padding:10px;font-family:monospace;font-size:0.82rem;color:#64748b;">v1.0.0</td>
+                    <td style="padding:10px;"><span style="background:#f3f4f6;color:#374151;padding:3px 8px;border-radius:4px;font-size:0.75rem;">PREVIOUS</span></td>
+                    <td style="padding:10px;font-size:0.8rem;color:#64748b;">Initial release</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

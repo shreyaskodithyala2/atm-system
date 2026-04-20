@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>ATM — Balance</title>
+    <link rel="stylesheet" th:href="@{/css/atm.css}">
+</head>
+<body class="atm-body">
+<div class="atm-machine">
+    <div class="atm-header">
+        <div class="bank-name">🏦 Secure Bank</div>
+        <div class="atm-label">Account Balance</div>
+    </div>
+
+    <div class="atm-screen">
+        <div class="screen-title">Account Balance</div>
+
+        <div style="text-align:center; padding: 10px 0 20px;">
+            <div style="color:#8b949e; font-size:0.75rem; letter-spacing:2px; margin-bottom:6px;">ACCOUNT HOLDER</div>
+            <div style="color:#e6edf3; font-size:1rem; font-weight:600;" th:text="${customer.name}"></div>
+        </div>
+
+        <div class="balance-display" style="margin-bottom:16px;">
+            <div class="label">Available Balance</div>
+            <div class="amount" th:text="'$' + ${#numbers.formatDecimal(account.balance, 1, 2)}">$0.00</div>
+        </div>
+
+        <div style="background:#161b22; border:1px solid #30363d; border-radius:10px; padding:16px;">
+            <div class="info-row">
+                <span>Account Number</span>
+                <span class="value" th:text="${account.accountNumber}"></span>
+            </div>
+            <div class="info-row">
+                <span>Account Type</span>
+                <span class="value" th:text="${account.accountType}"></span>
+            </div>
+            <div class="info-row">
+                <span>Card Number</span>
+                <span class="value" th:text="'**** **** **** ' + ${customer.atmCard.cardNumber.substring(12)}"></span>
+            </div>
+            <div class="info-row" style="border:none;">
+                <span>Card Status</span>
+                <span style="color:#00e676; font-size:0.82rem;">● Active</span>
+            </div>
+        </div>
+
+        <div style="margin-top:16px;">
+            <a href="/atm/session/dashboard" class="btn-atm-primary"
+               style="display:block; text-align:center; padding:12px; text-decoration:none; font-weight:700; letter-spacing:1px; background:linear-gradient(135deg,#00c853,#00e676); color:#000; border-radius:8px;">
+                ← Back to Menu
+            </a>
+        </div>
+    </div>
+
+    <div class="atm-footer">
+        <a href="/atm/session/dashboard">← Menu</a>
+        <a href="/atm/logout">Logout</a>
+    </div>
+</div>
+</body>
+</html>

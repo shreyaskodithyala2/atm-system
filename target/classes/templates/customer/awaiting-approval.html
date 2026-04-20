@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>ATM — Awaiting Approval</title>
+    <link rel="stylesheet" th:href="@{/css/atm.css}">
+</head>
+<body class="atm-body">
+<div class="atm-machine">
+    <div class="atm-header">
+        <div class="bank-name">🏦 Secure Bank</div>
+        <div class="atm-label">Transaction Pending</div>
+    </div>
+
+    <div class="atm-screen">
+        <div class="screen-title">Awaiting Approval</div>
+
+        <div style="text-align:center; padding: 10px 0;">
+            <div style="font-size: 2.5rem; margin-bottom: 12px;" id="spinner">⏳</div>
+            <div style="color:#f97316; font-size:0.9rem; font-weight:700; letter-spacing:1px; margin-bottom:8px;">
+                PENDING BANK MANAGER APPROVAL
+            </div>
+            <div style="color:#8b949e; font-size:0.8rem; margin-bottom:20px;">
+                Your transaction exceeds $5,000 and requires authorization.
+                Please wait while a manager reviews your request.
+            </div>
+        </div>
+
+        <div class="receipt-box" th:if="${transaction != null}">
+            <div class="receipt-line">
+                <span>TXN ID</span>
+                <span th:text="${transaction.transactionId.substring(0,8).toUpperCase() + '...'}"></span>
+            </div>
+            <div class="receipt-line">
+                <span>AMOUNT</span>
+                <span th:text="'$' + ${#numbers.formatDecimal(transaction.amount, 1, 2)}"></span>
+            </div>
+            <div class="receipt-line" style="border:none;">
+                <span>STATUS</span>
+                <span style="color:#f97316;" id="statusText">AWAITING APPROVAL</span>
+            </div>
+        </div>
+
+        <div style="margin-top:16px; color:#484f58; font-size:0.72rem; text-align:center;">
+            This page auto-refreshes every 5 seconds
+        </div>
+
+        <div style="margin-top:14px;">
+            <a href="/atm/session/dashboard"
+               style="display:block; text-align:center; padding:10px; text-decoration:none; color:#8b949e; border:1px solid #30363d; border-radius:8px; font-size:0.85rem;">
+                Cancel &amp; Return to Menu
+            </a>
+        </div>
+    </div>
+
+    <div class="atm-footer">
+        <span>Transaction ID: <span th:text="${transaction != null ? transaction.transactionId.substring(0,8).toUpperCase() : 'N/A'}"></span></span>
+    </div>
+</div>
+
+<script th:if="${transaction != null}" th:inline="javascript">
+    const txId = /*[[${transaction.transactionId}]]*/ '';
+    let dots = 0;
+
+    setInterval(function() {
+        dots = (dots + 1) % 4;
+        document.getElementById('spinner').textContent = ['⏳','🔄','⏳','🔄'][dots];
+
+        fetch('/atm/session/transaction-status/' + txId)
+            .then(r => r.json())
+            .then(data => {
+                if (data.status === 'COMPLETED') {
+                    document.getElementById('statusText').textContent = '✅ APPROVED';
+                    document.getElementById('statusText').style.color = '#00e676';
+                    setTimeout(() => { window.location.href = '/atm/session/receipt'; }, 1500);
+                } else if (data.status === 'DECLINED' || data.status === 'FAILED') {
+                    document.getElementById('statusText').textContent = '❌ DECLINED';
+                    document.getElementById('statusText').style.color = '#ef5350';
+                    setTimeout(() => { window.location.href = '/atm/session/dashboard'; }, 2000);
+                }
+            }).catch(() => {});
+    }, 5000);
+</script>
+</body>
+</html>
