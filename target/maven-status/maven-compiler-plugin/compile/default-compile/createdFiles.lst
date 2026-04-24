@@ -1,2 +1,5 @@
 com/atm/controller/CustomerController$1.class
+com/atm/hardware/ATMHardwareController.class
+com/atm/factory/TransactionFactory.class
+com/atm/dto/DiagnosticsReport$Builder.class
 com/atm/controller/AuthController$1.class

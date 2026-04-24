@@ -5,6 +5,52 @@ import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
+/**
+ * ============================================================
+ * SOLID PRINCIPLE 2 — OPEN/CLOSED PRINCIPLE (OCP)
+ * ============================================================
+ * Transaction is CLOSED for modification — the core fields
+ * (id, amount, status, session, account) never change.
+ * It is OPEN for extension — new transaction types such as
+ * WithdrawTransaction, DepositTransaction, TransferTransaction,
+ * and BillPayment are added by subclassing, not by editing here.
+ *
+ * Adding a brand-new transaction type (e.g. CryptoTransaction)
+ * requires ZERO changes to this class.
+ *
+ * ============================================================
+ * DESIGN PATTERN 1 — TEMPLATE METHOD PATTERN
+ * ============================================================
+ * This abstract class defines the SKELETON (template) for all
+ * transactions. The abstract method execute() is the "hook"
+ * that every subclass MUST implement with its own logic.
+ *
+ * The template guarantees: every transaction has an ID,
+ * a timestamp, an amount, a status, and a printReceipt().
+ * Only the execution step differs between subtypes.
+ *
+ * execute() ← template method (hook)
+ *   └── WithdrawTransaction.execute()  → verify funds + dispense cash
+ *   └── DepositTransaction.execute()   → accept and credit cash
+ *   └── TransferTransaction.execute()  → debit source, credit target
+ *   └── BillPayment.execute()          → debit and pay biller
+ *
+ * ============================================================
+ * DESIGN PATTERN 2 — STRATEGY PATTERN
+ * ============================================================
+ * Each concrete subclass is a different STRATEGY for processing
+ * a transaction. TransactionService selects the appropriate
+ * strategy at runtime based on the user's menu choice.
+ *
+ * Without Strategy, TransactionService would need a giant
+ * if-else block. With it, each strategy is self-contained
+ * and swappable.
+ *
+ * Context       → TransactionService
+ * Strategy IF   → Transaction (abstract)
+ * Strategies    → WithdrawTransaction, DepositTransaction,
+ *                 TransferTransaction, BillPayment
+ */
 @Entity
 @Table(name = "transactions")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
@@ -33,23 +79,37 @@ public abstract class Transaction {
     @JoinColumn(name = "account_id")
     private Account account;
 
+    /**
+     * TEMPLATE METHOD (hook step) + STRATEGY entry point.
+     *
+     * Template Method: This abstract method is the one step in
+     * the transaction lifecycle that varies per type. Every other
+     * step (id, timestamp, status, receipt) is shared.
+     *
+     * Strategy: Each concrete class provides its own algorithm
+     * here — e.g. WithdrawTransaction verifies funds and dispenses
+     * cash; DepositTransaction credits the account instead.
+     */
     public abstract boolean execute();
 
-    /** Returns a human-readable type label for use in templates. */
+    /**
+     * Shared template behaviour — returns a human-readable label.
+     * All subtypes inherit this without repeating code. (OCP)
+     */
     public String getType() {
         String name = this.getClass().getSimpleName();
         name = name.replace("Transaction", "");
         if (name.isEmpty()) name = "Transaction";
-        // Convert camel-case to spaced words: e.g. BillPayment → Bill Payment
         return name.replaceAll("([A-Z])", " $1").trim();
     }
 
-    /** Convenience for Thymeleaf type-checking without SpEL T() operator. */
-    public boolean isTransfer() { return this instanceof TransferTransaction; }
+    /** Convenience helpers for Thymeleaf type-checking (LSP — safe downcasting). */
+    public boolean isTransfer()    { return this instanceof TransferTransaction; }
     public boolean isBillPayment() { return this instanceof BillPayment; }
-    public boolean isWithdrawal() { return this instanceof WithdrawTransaction; }
-    public boolean isDeposit() { return this instanceof DepositTransaction; }
+    public boolean isWithdrawal()  { return this instanceof WithdrawTransaction; }
+    public boolean isDeposit()     { return this instanceof DepositTransaction; }
 
+    /** Shared receipt format — defined once in the template, used by all subtypes. */
     public String printReceipt() {
         return String.format(
             "Transaction ID: %s%nType: %s%nAmount: $%.2f%nStatus: %s%nDate: %s",

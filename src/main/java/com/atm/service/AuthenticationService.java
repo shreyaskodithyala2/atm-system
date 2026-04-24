@@ -16,21 +16,60 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Service
+/**
+ * ============================================================
+ * SOLID PRINCIPLE 1 — SINGLE RESPONSIBILITY PRINCIPLE (SRP)
+ * ============================================================
+ * AuthenticationService has ONE reason to change: the rules
+ * around how a customer authenticates at the ATM.
+ *
+ * It is NOT responsible for:
+ *   - Processing transactions  → TransactionService
+ *   - Approving large amounts  → ManagerService
+ *   - Managing cards/firmware  → AdminService
+ *
+ * If PIN policy changes (e.g. 4 attempts instead of 3), only
+ * THIS class needs to be updated. No other service is affected.
+ *
+ * ============================================================
+ * SOLID PRINCIPLE 5 — DEPENDENCY INVERSION PRINCIPLE (DIP)
+ * ============================================================
+ * All dependencies are declared as interfaces:
+ *   - CustomerRepository       (Spring Data interface)
+ *   - ATMCardRepository        (Spring Data interface)
+ *   - ATMSessionRepository     (Spring Data interface)
+ *   - ExternalCardNetworkService (interface — swappable impl)
+ *   - PasswordEncoder          (Spring Security interface)
+ *
+ * This class never depends on concrete implementations.
+ * Spring resolves and injects the correct bean at startup.
+ */
+@Service  // Spring Singleton — one shared instance across the application
 public class AuthenticationService {
 
+    // DIP: every field is typed to an interface, not a class
     @Autowired private CustomerRepository customerRepository;
     @Autowired private ATMCardRepository atmCardRepository;
     @Autowired private ATMSessionRepository sessionRepository;
-    @Autowired private ExternalCardNetworkService cardNetworkService;
-    @Autowired private PasswordEncoder passwordEncoder;
+    @Autowired private ExternalCardNetworkService cardNetworkService; // DIP: interface
+    @Autowired private PasswordEncoder passwordEncoder;               // DIP: interface
 
+    // Externalised to application.properties — easy to change without recompiling
     @Value("${atm.pin.max-attempts:3}")
     private int maxPinAttempts;
 
+    /** Result of inserting a card — keeps HTTP responses clean (SRP of result encoding). */
     public enum CardInsertResult { SUCCESS, INVALID_CARD, CARD_RETAINED, CARD_EXPIRED }
+
+    /** Result of entering a PIN. */
     public enum PinResult { SUCCESS, WRONG_PIN, CARD_RETAINED }
 
+    /**
+     * SRP: This method's ONLY job is card validation.
+     * DIP: Uses ExternalCardNetworkService interface — a real
+     * bank would swap in a live network implementation without
+     * changing any code here.
+     */
     @Transactional
     public CardInsertResult insertCard(String cardNumber) {
         if (!cardNetworkService.validateCard(cardNumber)) {
@@ -45,6 +84,10 @@ public class AuthenticationService {
         return CardInsertResult.SUCCESS;
     }
 
+    /**
+     * SRP: Creates and persists a new ATMSession — session
+     * lifecycle management is part of authentication concern.
+     */
     @Transactional
     public ATMSession createSession(String cardNumber) {
         Customer customer = customerRepository.findByCardNumber(cardNumber)
@@ -58,6 +101,13 @@ public class AuthenticationService {
         return sessionRepository.save(session);
     }
 
+    /**
+     * SRP: PIN verification and retry/retention logic lives
+     * entirely here — no other class needs to know about it.
+     *
+     * DIP: Uses PasswordEncoder interface — BCrypt today,
+     * any other algorithm tomorrow, without changing this method.
+     */
     @Transactional
     public PinResult authenticatePin(String sessionId, String rawPin) {
         ATMSession session = sessionRepository.findById(sessionId)

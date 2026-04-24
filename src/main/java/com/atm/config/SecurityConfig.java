@@ -3,6 +3,7 @@ package com.atm.config;
 import com.atm.service.ATMUserDetailsService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -63,7 +64,7 @@ public class SecurityConfig {
                 .permitAll()
             )
             .logout(logout -> logout
-                .logoutUrl("/staff/logout")
+                .logoutRequestMatcher(new AntPathRequestMatcher("/staff/logout"))
                 .logoutSuccessUrl("/staff/login?logout=true")
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID")

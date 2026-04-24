@@ -1,0 +1,431 @@
+========================================================================
+        SECURE BANK ATM SYSTEM — COMPLETE TESTING GUIDE
+========================================================================
+Project     : ATM Management System (OOAD Mini Project)
+Framework   : Spring Boot 3.2.4 + Thymeleaf + Spring Security + H2
+Java        : Java 17
+Port        : 8080
+========================================================================
+
+
+------------------------------------------------------------------------
+SECTION 1 — RUNNING THE APPLICATION
+------------------------------------------------------------------------
+
+Step 1: Navigate to the project folder
+    cd atm-system
+
+Step 2: Start the application
+    mvn spring-boot:run
+
+Step 3: Wait until you see this in the console:
+    Started AtmSystemApplication in X.XXX seconds
+
+Step 4: Open your browser and go to:
+    http://localhost:8080
+
+NOTE: The first time the app starts, it seeds the database automatically.
+      You will see all test credentials printed in the console.
+
+To stop the app: press Ctrl+C in the terminal.
+
+FRESH START (reset all data):
+    Stop the app → delete the "data/" folder → restart.
+    rm -rf data/
+    mvn spring-boot:run
+
+
+------------------------------------------------------------------------
+SECTION 2 — TEST ACCOUNTS
+------------------------------------------------------------------------
+
+  CUSTOMER ACCOUNTS (used at the ATM — card + PIN login)
+  -------------------------------------------------------
+  Customer 1 : Alice Johnson
+    Card No  : 4111111111111111
+    PIN      : 1234
+    Balance  : $8,000
+    Account  : ACC001 (Savings)
+    Status   : Active
+
+  Customer 2 : Bob Smith
+    Card No  : 5500005555555559
+    PIN      : 5678
+    Balance  : $12,000
+    Account  : ACC002 (Checking)
+    Status   : Active
+
+  Customer 3 : Carol White
+    Card No  : 4000000000000002
+    PIN      : 9999
+    Balance  : $150
+    Account  : ACC003 (Savings)
+    Status   : Active
+
+  Customer 4 : Diana Prince
+    Card No  : 4111111111111119
+    PIN      : 2468
+    Balance  : $5,500
+    Account  : ACC004 (Savings)
+    Status   : RETAINED (card blocked — use admin to release)
+
+  Customer 5 : Ethan Hunt
+    Card No  : 5500005555555567
+    PIN      : 1357
+    Balance  : $3,200
+    Account  : ACC005 (Checking)
+    Status   : RETAINED (card blocked — use admin to release)
+
+  STAFF ACCOUNTS (used at the staff portal — username + password login)
+  ----------------------------------------------------------------------
+  Bank Manager :
+    Username : MGR001
+    Password : manager123
+
+  System Admin :
+    Username : ADM001
+    Password : admin123
+
+
+------------------------------------------------------------------------
+SECTION 3 — ALL URLS
+------------------------------------------------------------------------
+
+  CUSTOMER / ATM FLOW
+  -------------------
+  http://localhost:8080                          → redirects to ATM
+  http://localhost:8080/atm/insert-card          → ATM home (insert card)
+  http://localhost:8080/atm/pin                  → PIN entry (after card)
+  http://localhost:8080/atm/session/dashboard    → ATM main menu
+  http://localhost:8080/atm/session/withdraw     → Withdraw cash
+  http://localhost:8080/atm/session/deposit      → Deposit cash
+  http://localhost:8080/atm/session/transfer     → Transfer funds
+  http://localhost:8080/atm/session/balance      → Check balance
+  http://localhost:8080/atm/session/mini-statement → Last 5 transactions
+  http://localhost:8080/atm/session/receipt      → Transaction receipt
+  http://localhost:8080/atm/session/awaiting     → Waiting for manager approval
+  http://localhost:8080/atm/session/logout       → End ATM session
+
+  STAFF PORTAL
+  ------------
+  http://localhost:8080/staff/login              → Staff login page
+
+  Manager Portal:
+  http://localhost:8080/staff/manager/dashboard  → Manager home
+  http://localhost:8080/staff/manager/approvals  → Pending large transactions
+  http://localhost:8080/staff/manager/audit      → Daily audit / transaction log
+
+  Admin Portal:
+  http://localhost:8080/staff/admin/dashboard    → Admin home
+  http://localhost:8080/staff/admin/cards        → Card management (retain/release)
+  http://localhost:8080/staff/admin/firmware     → Firmware version update
+  http://localhost:8080/staff/admin/diagnostics  → System diagnostics (POST only)
+
+  DATABASE CONSOLE
+  ----------------
+  http://localhost:8080/h2-console
+    JDBC URL  : jdbc:h2:file:./data/atmdb
+    Username  : sa
+    Password  : (leave blank)
+    Click "Connect"
+
+
+------------------------------------------------------------------------
+SECTION 4 — TESTING THE ATM CUSTOMER FLOW
+------------------------------------------------------------------------
+
+TEST 4.1 — Normal Withdrawal
+  1. Go to http://localhost:8080/atm/insert-card
+  2. Enter card: 4111111111111111  → click Insert Card
+  3. Enter PIN:  1234              → click Verify PIN
+  4. You land on the ATM Dashboard
+  5. Click "Withdraw"
+  6. Enter amount: 500             → click Withdraw
+  7. You are shown a receipt — verify:
+       - Transaction type: Withdraw
+       - Amount: $500.00
+       - New balance is $7,500.00
+  8. Click "Back to Menu" or "End Session"
+
+TEST 4.2 — Insufficient Funds
+  1. Insert card: 4000000000000002  (Carol — $150 balance)
+  2. PIN: 9999
+  3. Click Withdraw → enter 500
+  4. Expected: error "Insufficient funds" — no money is deducted
+
+TEST 4.3 — Large Transaction (Requires Manager Approval)
+  1. Insert card: 5500005555555559  (Bob — $12,000 balance)
+  2. PIN: 5678
+  3. Click Withdraw → enter 6000
+  4. Expected: "Awaiting Manager Approval" screen appears
+  5. The page polls every 5 seconds for approval status
+  6. OPEN A NEW TAB → log in as Manager (MGR001 / manager123)
+  7. Go to Approvals → click "Review" on the pending transaction
+  8. Click "Approve Transaction"
+  9. Switch back to the ATM tab — it auto-redirects to the receipt
+  10. Alternatively, click "Decline" — the ATM tab redirects back to menu
+
+TEST 4.4 — Fund Transfer
+  1. Insert card: 4111111111111111  (Alice)
+  2. PIN: 1234
+  3. Click "Transfer"
+  4. Enter amount: 200
+  5. Enter target account: ACC002  (Bob's account)
+  6. Submit → receipt shown
+  7. Log in as Bob (card 5500005555555559, PIN 5678) and check balance:
+       - Bob should now have $12,200
+
+TEST 4.5 — Balance Check
+  1. Insert any active card
+  2. Enter correct PIN
+  3. Click "Balance" → current balance displayed
+
+TEST 4.6 — Mini Statement
+  1. Perform 2–3 transactions with Alice's card
+  2. At the ATM menu → click "Mini Statement"
+  3. Last 5 transactions are shown with type, amount, date/time
+
+TEST 4.7 — Wrong PIN (Card Retention)
+  1. Insert card: 4111111111111111  (Alice)
+  2. Enter wrong PIN: 0000 → error, 1 attempt used
+  3. Enter wrong PIN: 0000 → error, 2 attempts used
+  4. Enter wrong PIN: 0000 → card is RETAINED, session ends
+  5. Go to Admin portal → Card Management → Alice's card shows RETAINED
+  6. Click "Release" → card becomes active again
+
+TEST 4.8 — Retained Card (Cannot Login)
+  1. Insert card: 4111111111111119  (Diana — pre-retained)
+  2. Expected: "This card has been retained" error — session does not start
+  3. Go to Admin → release the card → try again — login works
+
+
+------------------------------------------------------------------------
+SECTION 5 — TESTING THE BANK MANAGER PORTAL
+------------------------------------------------------------------------
+
+Login: http://localhost:8080/staff/login
+  Username: MGR001
+  Password: manager123
+
+TEST 5.1 — Manager Dashboard
+  - View count of pending approvals
+  - View count of today's total transactions
+  - See the pending transactions table
+
+TEST 5.2 — Approve a Large Transaction
+  1. First trigger a large transaction from the ATM (see Test 4.3)
+  2. Manager Dashboard shows the pending transaction
+  3. Click "Review" → Approval Detail page shows:
+       - Transaction ID, type, amount, timestamp
+       - Customer name, account number, current balance
+  4. Click "Approve Transaction"
+       - Balance is deducted from customer's account
+       - Transaction status → COMPLETED
+       - ATM tab (if still open) redirects to receipt
+  5. Click "Decline Transaction"
+       - Transaction status → DECLINED
+       - No money is moved
+       - ATM tab redirects back to dashboard
+
+TEST 5.3 — Daily Audit
+  1. Go to "Audit Transactions"
+  2. Today's date is pre-filled → click "View Audit"
+  3. You see:
+       - Total transaction count for the day
+       - Total volume ($)
+       - Count of still-pending transactions
+       - Full table with TXN ID, type, customer, amount, time, status
+  4. Change the date to yesterday or another date → different results
+
+
+------------------------------------------------------------------------
+SECTION 6 — TESTING THE SYSTEM ADMIN PORTAL
+------------------------------------------------------------------------
+
+Login: http://localhost:8080/staff/login
+  Username: ADM001
+  Password: admin123
+
+TEST 6.1 — Admin Dashboard
+  - Shows system status (OPERATIONAL)
+  - Shows current firmware version
+  - Quick-links to diagnostics, firmware, card management
+
+TEST 6.2 — Card Management (Retain & Release)
+  1. Go to "Card Management"
+  2. All 5 customers are listed with their card details
+  3. Summary at top shows: Total / Active / Retained counts
+  4. Diana Prince and Ethan Hunt show "RETAINED" status on first launch
+  5. Click "Release" next to Diana → confirmation popup → confirm
+       - Diana's card becomes ACTIVE
+       - She can now use the ATM
+  6. Click "Retain" next to Alice → confirmation popup → confirm
+       - Alice's card becomes RETAINED
+       - She cannot use the ATM until released
+  7. Each row shows: customer name, masked card number, expiry,
+     failed attempts (x/3), status badge, action button
+
+TEST 6.3 — Firmware Update
+  1. Go to "Firmware Update"
+  2. Current version shown (e.g., 2.4.1)
+  3. Enter a new version: 2.5.0 → click Update
+  4. Success message: "Firmware updated to version 2.5.0"
+  5. Try invalid format: "abc" → error message shown
+  6. Valid format: X.Y.Z (semantic versioning only)
+
+TEST 6.4 — Remote Diagnostics
+  1. From the Admin Dashboard → click "Run Diagnostics"
+  2. Report shows:
+       - System Status: OPERATIONAL
+       - Database Status: CONNECTED
+       - Network Status: ONLINE
+       - Cash Dispenser: FUNCTIONAL
+       - Card Reader: FUNCTIONAL
+       - Active session count
+       - Today's transaction count
+       - Retained card count
+       - Current firmware version
+
+
+------------------------------------------------------------------------
+SECTION 7 — TESTING THE H2 DATABASE CONSOLE
+------------------------------------------------------------------------
+
+  1. Make sure the app is running
+  2. Go to: http://localhost:8080/h2-console
+  3. Set JDBC URL to: jdbc:h2:file:./data/atmdb
+     (or full path: jdbc:h2:file:/path/to/atm-system/data/atmdb)
+  4. Username: sa | Password: (blank) → click Connect
+
+  Useful SQL queries:
+
+  -- View all customers
+  SELECT u.user_id, u.name, c.card_number
+  FROM atm_users u
+  JOIN customers c ON u.id = c.id;
+
+  -- View all ATM cards and their status
+  SELECT card_number, expiry_date, is_retained, failed_attempts
+  FROM atm_cards;
+
+  -- View all accounts and balances
+  SELECT account_number, account_type, balance
+  FROM accounts;
+
+  -- View all transactions
+  SELECT transaction_id, dtype, amount, status, timestamp
+  FROM transactions
+  ORDER BY timestamp DESC;
+
+  -- View pending (awaiting approval) transactions
+  SELECT transaction_id, amount, status
+  FROM transactions
+  WHERE status = 'AWAITING_APPROVAL';
+
+  -- View all ATM sessions
+  SELECT session_id, state, authenticated, start_time
+  FROM atm_sessions;
+
+
+------------------------------------------------------------------------
+SECTION 8 — BUSINESS RULES (WHAT THE SYSTEM ENFORCES)
+------------------------------------------------------------------------
+
+  CARD / PIN RULES
+  - PIN is BCrypt-hashed — never stored in plain text
+  - 3 wrong PINs → card is automatically retained
+  - Retained card → cannot log in until admin releases it
+  - Expired card → cannot log in (must visit branch)
+
+  TRANSACTION RULES
+  - Withdrawal: requires sufficient balance
+  - Deposit: any positive amount accepted
+  - Transfer: requires sufficient balance + valid target account number
+  - Large Transaction Threshold: $5,000
+      Any single transaction above $5,000 is paused and requires
+      Bank Manager approval before money moves
+
+  LARGE TRANSACTION FLOW
+  - Customer submits transaction > $5,000
+  - Status set to AWAITING_APPROVAL (money NOT moved yet)
+  - Customer sees a waiting screen (polls every 5 seconds)
+  - Manager approves → money moves → status COMPLETED → customer sees receipt
+  - Manager declines → status DECLINED → customer returned to dashboard
+
+  SESSION RULES
+  - Each ATM login creates a new session
+  - Session is validated on every ATM page (via interceptor)
+  - Session ends when customer clicks "End Session" or logs out
+  - Card retained sessions are blocked from all ATM pages
+
+
+------------------------------------------------------------------------
+SECTION 9 — PROJECT STRUCTURE (KEY FILES)
+------------------------------------------------------------------------
+
+  src/main/java/com/atm/
+  ├── config/
+  │   ├── DataInitializer.java       ← Seeds test data on first run
+  │   ├── SecurityConfig.java        ← Dual security filter chains
+  │   └── WebConfig.java             ← Registers session interceptor
+  ├── controller/
+  │   ├── ATMController.java         ← Card insert + PIN flow
+  │   ├── CustomerController.java    ← ATM session operations
+  │   ├── ManagerController.java     ← Manager portal
+  │   ├── AdminController.java       ← Admin portal
+  │   └── StaffLoginController.java  ← Staff login page
+  ├── model/
+  │   ├── ATMUser.java               ← Base class (JOINED inheritance)
+  │   ├── Customer.java
+  │   ├── BankManager.java
+  │   ├── SystemAdministrator.java
+  │   ├── ATMCard.java
+  │   ├── Account.java
+  │   ├── ATMSession.java
+  │   └── Transaction.java           ← Base class (SINGLE_TABLE)
+  ├── service/
+  │   ├── AuthenticationService.java ← Card/PIN validation logic
+  │   ├── TransactionService.java    ← All transaction processing
+  │   ├── ManagerService.java        ← Approval + audit logic
+  │   └── AdminService.java          ← Card management + diagnostics
+  └── repository/                    ← Spring Data JPA interfaces
+
+  src/main/resources/
+  ├── application.properties         ← DB URL, thresholds, port
+  ├── static/css/atm.css             ← All styling
+  └── templates/
+      ├── atm/                       ← Customer ATM screens
+      ├── manager/                   ← Manager portal pages
+      └── admin/                     ← Admin portal pages
+
+  Key properties (application.properties):
+    atm.transaction.large-threshold=5000.0   ← Change approval threshold
+    atm.pin.max-attempts=3                   ← Change PIN retry limit
+    server.port=8080                         ← Change port
+
+
+------------------------------------------------------------------------
+SECTION 10 — QUICK SMOKE TEST CHECKLIST
+------------------------------------------------------------------------
+
+  Run through this list to verify the system is working end-to-end:
+
+  [ ] App starts without errors on port 8080
+  [ ] http://localhost:8080 redirects to /atm/insert-card
+  [ ] Alice (4111111111111111 / 1234) can log in and see dashboard
+  [ ] Withdraw $200 → receipt shows correct new balance
+  [ ] Carol (4000000000000002 / 9999) gets "Insufficient funds" on $500 withdraw
+  [ ] Bob (5500005555555559 / 5678) submits $6,000 → awaiting approval screen
+  [ ] Manager (MGR001 / manager123) logs in → sees pending transaction
+  [ ] Manager approves → Bob's ATM tab shows receipt
+  [ ] Admin (ADM001 / admin123) logs in → sees card management
+  [ ] Diana (4111111111111119) is shown as RETAINED on card management page
+  [ ] Admin releases Diana's card → she can now log in at ATM
+  [ ] Admin retains Alice's card → she gets "card retained" error at ATM
+  [ ] Wrong PIN 3 times → card retained automatically
+  [ ] Logout works for both manager and admin without errors
+  [ ] H2 console connects with jdbc:h2:file:./data/atmdb
+
+========================================================================
+END OF TESTING GUIDE
+========================================================================

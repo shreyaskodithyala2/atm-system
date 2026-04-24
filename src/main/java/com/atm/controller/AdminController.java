@@ -2,6 +2,7 @@ package com.atm.controller;
 
 import com.atm.dto.DiagnosticsReport;
 import com.atm.model.ATMCard;
+import com.atm.model.Customer;
 import com.atm.model.SystemAdministrator;
 import com.atm.repository.SystemAdministratorRepository;
 import com.atm.service.AdminService;
@@ -64,16 +65,26 @@ public class AdminController {
     }
 
     @GetMapping("/cards")
-    public String retainedCards(Model model) {
-        List<ATMCard> retainedCards = adminService.getRetainedCards();
-        model.addAttribute("retainedCards", retainedCards);
+    public String cardManagement(Model model) {
+        List<Customer> customers = adminService.getAllCustomers();
+        long retainedCount = customers.stream()
+                .filter(c -> c.getAtmCard() != null && c.getAtmCard().isRetained()).count();
+        model.addAttribute("customers", customers);
+        model.addAttribute("retainedCount", retainedCount);
         return "admin/retained-cards";
     }
 
     @PostMapping("/cards/release/{id}")
     public String releaseCard(@PathVariable Long id, RedirectAttributes ra) {
         adminService.releaseCard(id);
-        ra.addFlashAttribute("message", "Card released successfully.");
+        ra.addFlashAttribute("message", "Card released successfully. Customer can now use their card.");
+        return "redirect:/staff/admin/cards";
+    }
+
+    @PostMapping("/cards/retain/{id}")
+    public String retainCard(@PathVariable Long id, RedirectAttributes ra) {
+        adminService.retainCard(id);
+        ra.addFlashAttribute("message", "Card has been retained. Customer will not be able to use it.");
         return "redirect:/staff/admin/cards";
     }
 }

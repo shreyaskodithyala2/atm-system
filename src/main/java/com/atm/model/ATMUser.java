@@ -3,6 +3,30 @@ package com.atm.model;
 import com.atm.model.enums.UserRole;
 import jakarta.persistence.*;
 
+/**
+ * ============================================================
+ * SOLID PRINCIPLE 2 — OPEN/CLOSED PRINCIPLE (OCP)
+ * ============================================================
+ * ATMUser is CLOSED for modification — its core structure
+ * (id, userId, name, role) never changes.
+ * It is OPEN for extension — new user types (Customer,
+ * BankManager, SystemAdministrator) are added by subclassing,
+ * NOT by editing this class.
+ *
+ * The abstract methods login() and logout() define a CONTRACT
+ * that every user type must fulfil in its own way.
+ *
+ * ============================================================
+ * SOLID PRINCIPLE 3 — LISKOV SUBSTITUTION PRINCIPLE (LSP)
+ * ============================================================
+ * Any subclass of ATMUser (Customer, BankManager,
+ * SystemAdministrator) can be used wherever an ATMUser is
+ * expected, without breaking the program.
+ *
+ * Example: ManagerService accepts ATMUser references and works
+ * correctly whether the underlying object is a BankManager or
+ * any future ATMUser subtype.
+ */
 @Entity
 @Table(name = "atm_users")
 @Inheritance(strategy = InheritanceType.JOINED)
@@ -13,6 +37,7 @@ public abstract class ATMUser {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // ---- Common fields shared by every user subtype ----
     @Column(name = "user_id", unique = true, nullable = false)
     private String userId;
 
@@ -23,6 +48,14 @@ public abstract class ATMUser {
     @Column(nullable = false)
     private UserRole role;
 
+    /**
+     * OCP: Abstract methods form the extension point.
+     * Each subclass provides its own login/logout implementation
+     * without this base class needing to change.
+     *
+     * LSP: Any subclass is guaranteed to have these behaviours,
+     * making substitution safe.
+     */
     public abstract boolean login();
     public abstract void logout();
 
