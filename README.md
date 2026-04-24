@@ -2,11 +2,6 @@
 
 A full-featured, object-oriented ATM simulation built with **Spring Boot 3.2.4** and **Java 17**. Supports three user roles — Customer, Bank Manager, and System Administrator — with a clean MVC architecture, five SOLID principles, and seven design patterns.
 
-> **Course:** UE23CS352B — Object Oriented Analysis & Design  
-> **Semester:** 6 — Section I CSE | January – May 2026  
-> **Faculty:** Professor Sowmya A M  
-> **PES University, Department of CSE**
-
 ---
 
 ## Team
